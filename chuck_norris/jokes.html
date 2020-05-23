@@ -1,0 +1,31 @@
+<html>
+   <head>
+      <title>The jQuery Example</title>
+      <script type = "text/javascript" 
+         src = "https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js">
+      </script>
+		
+      <script type = "text/javascript" language = "javascript">
+         $(document).ready(function() {
+			
+            $("#driver").click(function(event){
+               $.getJSON('/jokes_api', function(jd) {
+                  $('#stage').html('<p> Piada : ' + jd.piada + '</p>');
+		  
+               });
+            });
+				
+         });
+      </script>
+   </head>
+	
+   <body>
+      <p>Veja a piada:</p>
+		
+      <div id = "stage" style = "background-color:#cc0;">
+         PIADA
+      </div>
+		
+      <input type = "button" id = "driver" value = "Clique aqui!" />
+   </body>
+</html>
