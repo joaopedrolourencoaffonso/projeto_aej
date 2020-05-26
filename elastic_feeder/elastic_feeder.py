@@ -54,6 +54,26 @@ def show(word):
         except:
                 return "Error"
 
+@app.route('/search/<string:word>', methods=['GET'])
+def search(word):
+        try:
+                temp = word.split('|')
+                index = temp[0]
+                cor = temp[1]
+                filtro = '{ "query": { "match": { "favorite_color": "' + str(cor) + '" } } }'
+                file = open("filtro.json", "w")
+                file.write(filtro)
+                file.close()
+                resultado = subprocess.check_output('curl -XGET "localhost:9200/add/_search?pretty" -H "Content-Type: application/json" --data @filtro.json')
+                temp = resultado.decode('utf-8')
+                obj = json.loads(temp)
+                ###########
+                return "O número de pessoas que gosta de " + str(cor) + " é " + str(obj["hits"]["total"]["value"])
+
+        except:
+                return "Error"
+
+        
 if __name__ == '__main__':
         app.run(debug=True)
 
