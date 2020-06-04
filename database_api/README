@@ -1,0 +1,5 @@
+Nessa seção você vai encontrar as bases para um API que será utilizado para operar nossa database:
+
+database.py - script que vai interagir diretamente com a database
+pessoas.ods - arquivo ods com as informações mais importantes da nossa database
+pessoa.json - arquivo usado para inputar informação na database, contém um exemplo de uso da database
