@@ -25,64 +25,78 @@ def index():
 def search_id(num):
         try:
                 import requests, json
-
+                #modelo de input: numero da id sem os zeros
                 _id = id_function(num)
                 res = requests.get("http://localhost:9200/pessoas/_doc/" + str(_id))
                 res.raise_for_status()
                 obj = res.json()
-                lista = str(obj["_source"]["pessoa"][0]).split(":")
-                nome = lista[2].split(",")
-                return "Nome: " + str(nome[0])
+                nome = str(obj["_source"]["nome"])
+                return "Nome: " + str(nome)
         except:
                 return "Error "
 
 
+@app.route('/delete_id/<int:_id>', methods=['GET', 'POST'])
+def delete_id(_id):
+        try:
+                import subprocess
+                #modelo do input: _id
+                _id = id_function(_id)
+                subprocess.call('curl -XDELETE http://localhost:9200/pessoas/_doc/' + str(_id) + '?pretty')
+                return "Deleted with sucess" #seria interessante colocar um request aqui para ter certeza que realmente deletou, mas por enquanto isso aqui vai servir
+        except:
+                return "Error"
+
+@app.route('/add/<string:word>', methods=['GET', 'POST'])
+def add(word):
+        try:
+                import subprocess
+                #modelo do input na url: id|nome|sobrenome
+                file = open("add_pessoa.json")
+                add_pessoa = file.read()
+                file.close()
+                lista = word.split("|")
+                _id = str(id_function(int(lista[0])))
+                nome = str(lista[1])
+                sobrenome = str(lista[2])
+                add_pessoa = add_pessoa.replace("$_id", _id)
+                add_pessoa = add_pessoa.replace("$nome", nome)
+                add_pessoa = add_pessoa.replace("$sobrenome", sobrenome)
+                #basta adicionar mais campos
+                file = open("add.json","w")
+                file.write(add_pessoa)
+                file.close()
+                subprocess.call('curl -H "Content-Type: application/json" --data @add.json http://localhost:9200/pessoas/_doc/' + _id + '?pretty')
+                return "Adicionado com sucesso!"
+                
+        except:
+                return "Error"
+       
+@app.route('/search_nome/<string:word>', methods=['GET', 'POST'])
+def search_nome(word):
+        try:
+                import subprocess, json
+                #modelo de input: campo_pesquisado|busca
+                file = open("filtro_match.json")
+                filtro = file.read()
+                file.close()
+                lista = word.split("|")
+                filtro = filtro.replace("$campo",str(lista[0]))
+                filtro = filtro.replace("$busca",str(lista[1]))
+                #return "Ok"
+                file = open("filtro_match_temp.json", "w")
+                file.write(filtro)
+                file.close()
+                resultado = subprocess.check_output('curl -XGET "localhost:9200/pessoas/_search?pretty" -H "Content-Type: application/json" --data @filtro_match_temp.json')
+                #dá erro relacionado a middle bit uff-8 inválido, tenho a menor ideia do que seja
+                temp = resultado.decode('utf-8')
+                obj = json.loads(temp)                
+                return "O resultado é " + str(obj["hits"]["total"]["value"])
+        except:
+                return "Error"
 
 
-#@app.route('/add/<string:word>', methods=['GET', 'POST'])
-#def add(word):
-#        try:
-#                temp = word.split('|')
-#                index = temp[0]
-#                temp = temp[1]
-#                temp = temp.split(',')
-#                content = '{"nome":"' + str(temp[1]) + '","favorite_color":"' + str(temp[2]) + '"}'
-#                file = open("add.json", "w")
-#                file.write(content)
-#                file.close()
-#                subprocess.call('curl -H "Content-Type: application/json" --data @add.json http://localhost:9200/' + index +'/_doc/' + str(temp[0]) + '?pretty')
-#                return content
-#        except:
-#                return "Error"
 
-#@app.route('/exclude/<string:word>', methods=['GET', 'POST'])
-#def exclude(word):
-#        try:
-#                temp = word.split('|')
-#                index = temp[0]
-#                _id = temp[1]
-#                subprocess.call('curl -XDELETE http://localhost:9200/' + index +'/_doc/' + str(_id) + '?pretty')
-#                return "Sucess!"
-#                
-#        except:
-#                return "Error"
-#
-#
-#@app.route('/show/<string:word>', methods=['GET'])
-#def show(word):
-#        try:
-#                temp = word.split('|')
-#                index = temp[0]
-#                _id = temp[1]
-#                res = requests.get("http://localhost:9200/" + str(index) + "/_doc/" + str(_id))
-#                res.raise_for_status()
-#                obj = res.json()
-#                retorno = "Nome: " + str(obj["_source"]["nome"]) + " | Cor Favorita: " + str(obj["_source"]["favorite_color"])
-#                return retorno
-#
-#        except:
-#                return "Error"
-#
 #@app.route('/search/<string:word>', methods=['GET'])
 #def search(word):
 #        try:
