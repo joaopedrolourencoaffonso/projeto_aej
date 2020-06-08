@@ -96,7 +96,33 @@ def search_nome(word):
                 return "Error"
 
 
+@app.route('/search_date_range/<string:dates>', methods=['GET', 'POST'])
+def search_date_range(dates):
+        try:
+                import subprocess, json
+                #acessando a url /search_date_range/1990-11-01|2020-01-21 <--exemplo
+                lista = dates.split("|")
+                file = open("filtro_data.json")
+                filtro = file.read()
+                file.close()
+                filtro = filtro.replace("$data_inicial",str(lista[0]))
+                filtro = filtro.replace("$data_final",str(lista[1]))
+                file = open("filtro_data_temp.json", "w")
+                file.write(filtro)
+                file.close()
+                resultado = subprocess.check_output('curl -XGET "localhost:9200/pessoas/_search?pretty" -H "Content-Type: application/json" --data @filtro_data_temp.json')
+                temp = resultado.decode('utf-8')
+                obj = json.loads(temp)
+                if int(obj["hits"]["total"]["value"]) == 0:
+                        return "Erro nos termos de busca ou entrada inexistente."
+                else:
+                        return "O resultado é " + str(obj["hits"]["total"]["value"])
 
+        except:
+                return "Error"
+
+        
+        
 #@app.route('/search/<string:word>', methods=['GET'])
 #def search(word):
 #        try:
