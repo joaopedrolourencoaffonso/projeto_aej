@@ -1,0 +1,1 @@
+{ "query": { "range" : { "data_de_nascimento" : { "gte" : "1990-01-01", "lt" : "2000-01-01" } } } }

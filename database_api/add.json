@@ -1,0 +1,48 @@
+{
+	"pessoa": [
+    {
+        "id": "0060",
+        "nome": "jose",
+        "sobrenome" : "geronimo",
+        "cor": "branco", 
+        "genero": "masculino",       
+        "pessoa_juridica": false,
+        "data_de_nascimento": "2012-12-01",
+        "endereco": {
+            "cidade": "Chico City",
+            "estado": "DF",
+            "pais": "Brasil",
+            "lat": 107.21,
+            "long": 79.62
+        },
+        "escolaridade": [
+            "ensino basico incompleto"
+        ],                
+        "familia": {
+            "pai": "0034",
+            "mae": "0027",
+            "filhos": [
+                "false"
+            ],
+            "conjuge": "false"
+        },        
+        "falecimento": {
+            "data": "2999-01-01",            
+            "causas": ["false"]
+        },
+        "saude": {            
+            "doenças": ["false"],
+            "necessidades_especiais": {                
+                "tipo": "false"
+            },
+            "sangue": {
+                "tipo": "AB",
+                "fator_rh": false
+            },
+            "fumante": true            
+        },
+        "ocupacao": true,
+        "redes_sociais": ["twitter","facebook"]
+    }
+]
+}
