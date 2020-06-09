@@ -121,7 +121,18 @@ def search_date_range(dates):
         except:
                 return "Error"
 
-        
+@app.route('/populacao', methods=['GET'])
+def populacao():
+        try:
+              import subprocess, json
+              #não precisa de input, retorna a população atual
+              resultado = subprocess.check_output('curl -XGET "localhost:9200/pessoas/_search?pretty" -H "Content-Type: application/json" --data @populacao.json')
+              temp = resultado.decode('utf-8')
+              obj = json.loads(temp)
+              return "A população atual é " + str(obj["hits"]["total"]["value"])
+              
+        except:
+                return "Error"       
         
 #@app.route('/search/<string:word>', methods=['GET'])
 #def search(word):
