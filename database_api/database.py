@@ -72,29 +72,25 @@ def add(word):
         except:
                 return "Error"
        
-@app.route('/search_nome/<string:word>', methods=['GET', 'POST'])
-def search_nome(word):
+@app.route('/search_field/<string:word>', methods=['GET', 'POST'])
+def search_field(word):
         try:
-                import subprocess, json
+                import requests, json
                 #modelo de input: campo_pesquisado|busca
-                file = open("filtro_match.json")
-                filtro = file.read()
-                file.close()
                 lista = word.split("|")
+                filtro = "http://localhost:9200/pessoas/_count?q=$campo:$busca"
                 filtro = filtro.replace("$campo",str(lista[0]))
                 filtro = filtro.replace("$busca",str(lista[1]))
-                #return "Ok"
-                file = open("filtro_match_temp.json", "w")
-                file.write(filtro)
-                file.close()
-                resultado = subprocess.check_output('curl -XGET "localhost:9200/pessoas/_search?pretty" -H "Content-Type: application/json" --data @filtro_match_temp.json')
-                #dá erro relacionado a middle bit uff-8 inválido, tenho a menor ideia do que seja
-                temp = resultado.decode('utf-8')
-                obj = json.loads(temp)                
-                return "O resultado é " + str(obj["hits"]["total"]["value"])
+                res = requests.get(filtro)
+                res.raise_for_status()
+                obj = res.json()
+
+                if str(obj["count"]) == "0":
+                        return "Erro nos termos de busca ou entrada inexistente"
+                else:
+                        return "O resultado é " + str(obj["count"])
         except:
                 return "Error"
-
 
 @app.route('/search_date_range/<string:dates>', methods=['GET', 'POST'])
 def search_date_range(dates):
@@ -124,15 +120,13 @@ def search_date_range(dates):
 @app.route('/populacao', methods=['GET'])
 def populacao():
         try:
-              import subprocess, json
-              #não precisa de input, retorna a população atual
-              resultado = subprocess.check_output('curl -XGET "localhost:9200/pessoas/_search?pretty" -H "Content-Type: application/json" --data @populacao.json')
-              temp = resultado.decode('utf-8')
-              obj = json.loads(temp)
-              return "A população atual é " + str(obj["hits"]["total"]["value"])
-              
+                import requests, json
+                res = requests.get("http://localhost:9200/pessoas/_count?q=falecimento.data:2999-01-01")
+                res.raise_for_status()
+                obj = res.json()
+                return "A população atual é " + str(obj["count"])              
         except:
-                return "Error"       
+                return "Error"      
         
 #@app.route('/search/<string:word>', methods=['GET'])
 #def search(word):
@@ -167,3 +161,43 @@ if __name__ == '__main__':
 #for i in x:
 #        print(i)
 #taca um split
+
+
+#PASSADO
+
+#@app.route('/search_nome/<string:word>', methods=['GET', 'POST']) ##usa query para pesquisar em qualquer campo
+#def search_nome(word):
+#        try:
+#                import subprocess, json
+#                #modelo de input: campo_pesquisado|busca
+#                file = open("filtro_match.json")
+#                filtro = file.read()
+#                file.close()
+#                lista = word.split("|")
+#                filtro = filtro.replace("$campo",str(lista[0]))
+#                filtro = filtro.replace("$busca",str(lista[1]))
+#                #return "Ok"
+#                file = open("filtro_match_temp.json", "w")
+#                file.write(filtro)
+#                file.close()
+#                resultado = subprocess.check_output('curl -XGET "localhost:9200/pessoas/_search?pretty" -H "Content-Type: application/json" --data @filtro_match_temp.json')
+#                #dá erro relacionado a middle bit uff-8 inválido, tenho a menor ideia do que seja
+#                temp = resultado.decode('utf-8')
+#                obj = json.loads(temp)                
+#                return "O resultado é " + str(obj["hits"]["total"]["value"])
+#        except:
+#                return "Error"
+
+
+#@app.route('/populacao', methods=['GET']) ##usa query para pesquisar a população atual
+#def populacao():
+#        try:
+#              import subprocess, json
+#              #não precisa de input, retorna a população atual
+#              resultado = subprocess.check_output('curl -XGET "localhost:9200/pessoas/_search?pretty" -H "Content-Type: application/json" --data @populacao.json')
+#              temp = resultado.decode('utf-8')
+#              obj = json.loads(temp)
+#              return "A população atual é " + str(obj["hits"]["total"]["value"])
+#              
+#        except:
+#                return "Error" 
