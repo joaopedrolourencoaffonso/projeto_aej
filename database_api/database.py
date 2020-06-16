@@ -126,7 +126,38 @@ def populacao():
                 obj = res.json()
                 return "A população atual é " + str(obj["count"])              
         except:
-                return "Error"      
+                return "Error"
+        
+@app.route('/nome', methods=['GET'])
+def nome():
+        try:
+                import requests, json
+                lista = {}
+                #só chamar a url
+                res = requests.get("http://localhost:9200/pessoas/_count?q=nome:*")
+                res.raise_for_status()
+                obj = res.json()
+                tamanho = range(1, int(obj["count"]))
+                
+                for i in tamanho:
+                        _id = str(id_function(i))
+                        #return "Ok " + _id
+                        res = requests.get("http://localhost:9200/pessoas/_doc/" + str(_id))
+                        res.raise_for_status()
+                        obj = res.json()
+                        nome = str(obj["_source"]["nome"])
+                        
+                        if nome not in lista.keys():
+                                lista[nome] = 1
+                        else:
+                                lista[nome] = lista[nome] + 1
+
+                popular = max(lista, key=lista.get)
+                return "O nome mais comum ao longo da história é: '" + str(popular) + "'" 
+                
+        except:
+                return "Error"       
+
         
 #@app.route('/search/<string:word>', methods=['GET'])
 #def search(word):
