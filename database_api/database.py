@@ -156,7 +156,30 @@ def nome():
                 return "O nome mais comum ao longo da história é: '" + str(popular) + "'" 
                 
         except:
-                return "Error"       
+                return "Error" 
+        
+@app.route('/idade/<int:_id>', methods=['GET'])
+def idade(_id):
+        try:
+                import requests, json
+                from datetime import date, datetime
+                #basta colocar o número da id
+                _id = id_function(_id)
+                res = requests.get("http://localhost:9200/pessoas/_doc/" + str(_id))
+                res.raise_for_status()
+                obj = res.json()
+                if str(obj["_source"]["falecimento"]["data"]) == "2999-01-01":
+                        nascimento = str(obj["_source"]["data_de_nascimento"])
+                        temp = nascimento.split("-")
+                        nascimento = datetime(int(temp[0]), int(temp[1]), int(temp[2]))
+                        today = date.today()
+                        idade = today.year - nascimento.year - ((today.month, today.day) < (nascimento.month, nascimento.day))
+                        return "A idade de " + str(obj["_source"]["nome"]) + " " + str(obj["_source"]["sobrenome"]) + " é " + str(idade) + " anos."
+                else:
+                        return "" + str(obj["_source"]["nome"]) + " " + str(obj["_source"]["sobrenome"]) + " morreu em " + str(obj["_source"]["falecimento"]["data"]) + " ."
+                
+        except:
+                return "Error"
 
         
 #@app.route('/search/<string:word>', methods=['GET'])
