@@ -180,7 +180,115 @@ def idade(_id):
                 
         except:
                 return "Error"
+@app.route('/and_search/<string:data>', methods=['GET'])
+def and_search(data):
+        try:
+                #1 - Essa API é capaz defazer queries 'and'
+                #2 - modelo de input: se houver apenas um campo de busca, você joga: campo|busca, se houver dois, você joga campo1|busca1|campo2|busca2 e assim por diante até quatro campos
+                from elasticsearch import Elasticsearch
+                es = Elasticsearch()
+                lista = data.split("|")
 
+                if len(lista) == 2:
+                        campo = lista[0]
+                        busca = lista[1]
+
+                        res = es.search(index="pessoas", body={"query":{"match": {campo:busca}}}) #eu já tenho uma api que faz isso, mas achei válido fazer também
+                        return "O resultado é: " + str(res['hits']['total']['value'])
+                
+                if len(lista) == 4:
+                        campo1 = str(lista[0])
+                        busca1 = str(lista[1])
+                        campo2 = str(lista[2])
+                        busca2 = str(lista[3])
+
+                        res = es.search(index="pessoas", body={"query":{"bool":{"must":[{"match":{campo1:busca1}},{"match":{campo2:busca2}}]}}})
+                        return "O resultado é: " + str(res['hits']['total']['value'])
+
+                if len(lista) == 6:
+                        campo1 = str(lista[0])
+                        busca1 = str(lista[1])
+                        campo2 = str(lista[2])
+                        busca2 = str(lista[3])
+                        campo3 = str(lista[4])
+                        busca3 = str(lista[5])
+
+                        res = es.search(index="pessoas", body={"query":{"bool":{"must":[{"match":{campo1:busca1}},{"match":{campo2:busca2}},{"match":{campo3:busca3}}]}}})
+                        return "O resultado é: " + str(res['hits']['total']['value'])
+
+                if len(lista) == 8:
+                        campo1 = str(lista[0])
+                        busca1 = str(lista[1])
+                        campo2 = str(lista[2])
+                        busca2 = str(lista[3])
+                        campo3 = str(lista[4])
+                        busca3 = str(lista[5])
+                        campo4 = str(lista[6])
+                        busca4 = str(lista[7])
+
+                        res = es.search(index="pessoas", body={"query":{"bool":{"must":[{"match":{campo1:busca1}},{"match":{campo2:busca2}},{"match":{campo3:busca3}},{"match":{campo4:busca4}}]}}})
+                        return "O resultado é: " + str(res['hits']['total']['value'])
+
+                if len(lista) not in [2,4,6,8]:
+                        return "Reveja sua pesquisa"
+                
+        except:
+                return "Error"
+
+@app.route('/or_search/<string:data>', methods=['GET'])
+def or_search(data):
+        try:
+                #1 - Essa API é capaz defazer queries 'and'
+                #2 - modelo de input: se houver apenas um campo de busca, você joga: campo|busca, se houver dois, você joga campo1|busca1|campo2|busca2 e assim por diante até quatro campos
+                from elasticsearch import Elasticsearch
+                es = Elasticsearch()
+                lista = data.split("|")
+
+                if len(lista) == 2:
+                        campo = lista[0]
+                        busca = lista[1]
+
+                        res = es.search(index="pessoas", body={"query":{"bool":{"should":[{"match": {campo:busca}}]}}}) 
+                        return "O resultado é: " + str(res['hits']['total']['value'])
+
+                if len(lista) == 4:
+                        campo1 = str(lista[0])
+                        busca1 = str(lista[1])
+                        campo2 = str(lista[2])
+                        busca2 = str(lista[3])
+
+                        res = es.search(index="pessoas", body={"query":{"bool":{"should":[{"match":{campo1:busca1}},{"match":{campo2:busca2}}]}}})
+                        return "O resultado é: " + str(res['hits']['total']['value'])
+
+                if len(lista) == 6:
+                        campo1 = str(lista[0])
+                        busca1 = str(lista[1])
+                        campo2 = str(lista[2])
+                        busca2 = str(lista[3])
+                        campo3 = str(lista[4])
+                        busca3 = str(lista[5])
+
+                        res = es.search(index="pessoas", body={"query":{"bool":{"should":[{"match":{campo1:busca1}},{"match":{campo2:busca2}},{"match":{campo3:busca3}}]}}})
+                        return "O resultado é: " + str(res['hits']['total']['value'])
+
+                if len(lista) == 8:
+                        campo1 = str(lista[0])
+                        busca1 = str(lista[1])
+                        campo2 = str(lista[2])
+                        busca2 = str(lista[3])
+                        campo3 = str(lista[4])
+                        busca3 = str(lista[5])
+                        campo4 = str(lista[6])
+                        busca4 = str(lista[7])
+
+                        res = es.search(index="pessoas", body={"query":{"bool":{"should":[{"match":{campo1:busca1}},{"match":{campo2:busca2}},{"match":{campo3:busca3}},{"match":{campo4:busca4}}]}}})
+                        return "O resultado é: " + str(res['hits']['total']['value'])
+
+                if len(lista) not in [2,4,6,8]:
+                        return "Reveja sua pesquisa"
+                
+        except:
+                return "Error"
         
 #@app.route('/search/<string:word>', methods=['GET'])
 #def search(word):
