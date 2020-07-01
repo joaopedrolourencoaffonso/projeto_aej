@@ -128,35 +128,58 @@ def populacao():
         except:
                 return "Error"
         
-@app.route('/nome', methods=['GET'])
-def nome():
+@app.route('/nome/<int:num>', methods=['GET'])
+def nome(num):
         try:
+                num = int(num)
                 import requests, json
                 lista = {}
-                #só chamar a url
+                #se num = 1, ele devolve o nome mais comum da história, se num = 2, ele devolve o nome mais comum no momento
                 res = requests.get("http://localhost:9200/pessoas/_count?q=nome:*")
                 res.raise_for_status()
                 obj = res.json()
                 tamanho = range(1, int(obj["count"]))
-                
-                for i in tamanho:
-                        _id = str(id_function(i))
-                        #return "Ok " + _id
-                        res = requests.get("http://localhost:9200/pessoas/_doc/" + str(_id))
-                        res.raise_for_status()
-                        obj = res.json()
-                        nome = str(obj["_source"]["nome"])
-                        
-                        if nome not in lista.keys():
-                                lista[nome] = 1
-                        else:
-                                lista[nome] = lista[nome] + 1
 
-                popular = max(lista, key=lista.get)
-                return "O nome mais comum ao longo da história é: '" + str(popular) + "'" 
+                if num == 1:
+                        for i in tamanho:
+                                _id = str(id_function(i))
+                                #return "Ok " + _id
+                                res = requests.get("http://localhost:9200/pessoas/_doc/" + str(_id))
+                                res.raise_for_status()
+                                obj = res.json()
+                                nome = str(obj["_source"]["nome"])
+                        
+                                if nome not in lista.keys():
+                                        lista[nome] = 1
+                                else:
+                                        lista[nome] = lista[nome] + 1
+
+                        popular = max(lista, key=lista.get)
+                        return "O nome mais comum ao longo da história é: '" + str(popular) + "'"
+
+                if num == 2:                
+                        for i in tamanho:
+                                _id = str(id_function(i))
+                                #return "Ok " + _id
+                                res = requests.get("http://localhost:9200/pessoas/_doc/" + str(_id))
+                                res.raise_for_status()
+                                obj = res.json()
+                                nome = str(obj["_source"]["nome"])
+
+                                if obj["_source"]["falecimento"]["data"] == "2999-01-01":
+                                        if nome not in lista.keys():
+                                                lista[nome] = 1
+                                        else:
+                                                lista[nome] = lista[nome] + 1
+
+                        popular = max(lista, key=lista.get)
+                        return "O nome mais comum no momento é: '" + str(popular) + "'"
+
+                else:
+                        return "Erro, rever a url."
                 
         except:
-                return "Error" 
+                return "Error"
         
 @app.route('/idade/<int:_id>', methods=['GET'])
 def idade(_id):
