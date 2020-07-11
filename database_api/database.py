@@ -210,6 +210,35 @@ def idade(_id):
                 
         except:
                 return "Error"
+
+@app.route('/idade_media', methods=['GET'])
+def idade_media():
+        try:
+                import json, subprocess
+                from datetime import date, datetime
+                resultado = subprocess.check_output('curl -XGET "localhost:9200/pessoas/_search?pretty" -H "Content-Type: application/json" --data @_source.json')
+                temp = resultado.decode('utf-8')
+                obj = json.loads(temp)
+                idade_total = 0
+                for element in obj['hits']['hits']:
+                        temp = str(element)
+                        temp = temp.split(",")
+                        #return "Ok"
+                        temp = temp[4]
+                        nascimento = str(temp[36:46])
+                        temp = nascimento.split("-")
+                        nascimento = datetime(int(temp[0]), int(temp[1]), int(temp[2]))
+                        today = date.today()
+                        idade = today.year - nascimento.year - ((today.month, today.day) < (nascimento.month, nascimento.day))
+                        idade_total = int(idade_total) + int(idade)
+
+                idade_media = idade_total / int(obj['hits']['total']['value'])
+                return "A idade média da população é:" + str(idade_media)
+                
+        except:
+                return "Error"
+        
+
 @app.route('/and_search/<string:data>', methods=['GET'])
 def and_search(data):
         try:
