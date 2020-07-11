@@ -319,6 +319,60 @@ def or_search(data):
                 
         except:
                 return "Error"
+        
+@app.route('/cidade/<int:num>', methods=['GET'])
+def cidade(num):
+        try:
+                num = int(num)
+                import requests, json
+                lista = {}
+                #não precisa de intervalo
+                res = requests.get("http://localhost:9200/pessoas/_count?q=endereco.cidade:*")
+                res.raise_for_status()
+                obj = res.json()
+                tamanho = range(1, int(obj["count"]))
+
+                if num == 1:
+                        for i in tamanho:
+                                _id = str(id_function(i))
+                                #return "Ok " + _id
+                                res = requests.get("http://localhost:9200/pessoas/_doc/" + str(_id))
+                                res.raise_for_status()
+                                obj = res.json()
+                                cidade = str(obj["_source"]["endereco"]["cidade"])
+                        
+                                if cidade not in lista.keys():
+                                        lista[cidade] = 1
+                                else:
+                                        lista[cidade] = lista[cidade] + 1
+
+                        popular = max(lista, key=lista.get)
+                        return "A cidade mais populosa ao longo da história é: '" + str(popular) + "'"
+
+                if num == 2:                
+                        for i in tamanho:
+                                _id = str(id_function(i))
+                                #return "Ok " + _id
+                                res = requests.get("http://localhost:9200/pessoas/_doc/" + str(_id))
+                                res.raise_for_status()
+                                obj = res.json()
+                                cidade = str(obj["_source"]["endereco"]["cidade"])
+
+                                if obj["_source"]["falecimento"]["data"] == "2999-01-01":
+                                        if cidade not in lista.keys():
+                                                lista[cidade] = 1
+                                        else:
+                                                lista[cidade] = lista[cidade] + 1
+
+                        popular = max(lista, key=lista.get)
+                        return "A cidade mais populosa no momento é: '" + str(popular) + "'"
+
+                else:
+                        return "Erro, rever a url."
+                
+        except:
+                return "Error"        
+
 @app.route('/familia/<int:num>', methods=['GET', 'POST'])
 def familia(num):
         try:
