@@ -1,0 +1,9 @@
+{
+    "_source": [ "data_de_nascimento" ],
+    "size": 100,
+    "query" : {
+        "match" : {
+            "falecimento.data": "2999-01-01"
+        }
+    }
+}
