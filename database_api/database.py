@@ -322,34 +322,39 @@ def or_search(data):
 @app.route('/familia/<int:num>', methods=['GET', 'POST'])
 def familia(num):
         try:
+                ##Essa api vai traçar a arvóre genealógica de qualquer pessoa, até os níveis dos avós, baseado em sua id. 
+                ##Para usar, basta chamar: /familia/{id_desejada} ex: /familia/5
                 _id = id_function(num)
-                pessoa = pesquisa(_id)
-                pessoa = pessoa.split("|")
-                pai = pesquisa(pessoa[0])
-                mae = pesquisa(pessoa[1])
-                ##
-                pai = pai.split("|")
-                mae = mae.split("|")
-                ##
-                pai_do_pai = pesquisa(pai[0])
-                mae_do_pai = pesquisa(pai[1])
-                ##
-                pai_da_mae = pesquisa(mae[0])
-                mae_da_mae = pesquisa(mae[1])
-                ##
-                pai_do_pai = pai_do_pai.split("|")
-                mae_do_pai = mae_do_pai.split("|")
-                pai_da_mae = pai_da_mae.split("|")
-                mae_da_mae = mae_da_mae.split("|")
-                ##
-                string = "Nome: " + pessoa[2]
-                string = string + "| Pai: " + pai[2]
-                string = string + "| Mãe: " + mae[2]
-                string = string + "| Avô Paterno: " + pai_do_pai[2]
-                string = string + "| Avó Paterna: " + mae_do_pai[2]
-                string = string + "| Avô Materno: " + pai_da_mae[2]
-                string = string + "| Avó Materna: " + mae_da_mae[2]
-                return string
+                if str(_id) == "0000":
+                        return "Usuário desconhecido ou inexistente"
+                else:
+                        pessoa = pesquisa(_id)
+                        pessoa = pessoa.split("|")
+                        pai = pesquisa(pessoa[0])
+                        mae = pesquisa(pessoa[1])
+                        ##
+                        pai = pai.split("|")
+                        mae = mae.split("|")
+                        ##
+                        pai_do_pai = pesquisa(pai[0])
+                        mae_do_pai = pesquisa(pai[1])
+                        ##
+                        pai_da_mae = pesquisa(mae[0])
+                        mae_da_mae = pesquisa(mae[1])
+                        ##
+                        pai_do_pai = pai_do_pai.split("|")
+                        mae_do_pai = mae_do_pai.split("|")
+                        pai_da_mae = pai_da_mae.split("|")
+                        mae_da_mae = mae_da_mae.split("|")
+                        ##
+                        string = "Nome: " + pessoa[2]
+                        string = string + "| Pai: " + pai[2]
+                        string = string + "| Mãe: " + mae[2]
+                        string = string + "| Avô Paterno: " + pai_do_pai[2]
+                        string = string + "| Avó Paterna: " + mae_do_pai[2]
+                        string = string + "| Avô Materno: " + pai_da_mae[2]
+                        string = string + "| Avó Materna: " + mae_da_mae[2]
+                        return string
                 
         except:
                 return "Error"
