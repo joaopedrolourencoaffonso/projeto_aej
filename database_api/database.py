@@ -211,29 +211,46 @@ def idade(_id):
         except:
                 return "Error"
 
-@app.route('/idade_media', methods=['GET'])
-def idade_media():
+@app.route('/idade_media/<string:filtro>', methods=['GET'])
+def idade_media(filtro):
         try:
-                import json, subprocess
                 from datetime import date, datetime
-                resultado = subprocess.check_output('curl -XGET "localhost:9200/pessoas/_search?pretty" -H "Content-Type: application/json" --data @_source.json')
-                temp = resultado.decode('utf-8')
-                obj = json.loads(temp)
-                idade_total = 0
-                for element in obj['hits']['hits']:
-                        temp = str(element)
-                        temp = temp.split(",")
-                        #return "Ok"
-                        temp = temp[4]
-                        nascimento = str(temp[36:46])
-                        temp = nascimento.split("-")
-                        nascimento = datetime(int(temp[0]), int(temp[1]), int(temp[2]))
-                        today = date.today()
-                        idade = today.year - nascimento.year - ((today.month, today.day) < (nascimento.month, nascimento.day))
-                        idade_total = int(idade_total) + int(idade)
+                from elasticsearch import Elasticsearch
+                es = Elasticsearch()
+                if filtro == "1":
+                        idade_total = 0
+                        res = es.search(index="pessoas", body={"_source": [ "data_de_nascimento" ],"size": 100,"query" : { "bool" : { "must" : [ {"match" : {"falecimento.data": "2999-01-01"}}]}}})
+                        for i in res['hits']['hits']:
+                                x = str(i)
+                                nascimento = str(x[104:114])
+                                temp = nascimento.split("-")
+                                nascimento = datetime(int(temp[0]), int(temp[1]), int(temp[2]))
+                                today = date.today()
+                                idade = today.year - nascimento.year - ((today.month, today.day) < (nascimento.month, nascimento.day))
+                                idade_total = int(idade_total) + int(idade)
+                                #return "Ok"
 
-                idade_media = idade_total / int(obj['hits']['total']['value'])
-                return "A idade média da população é:" + str(idade_media)
+                        idade_media = idade_total / int(res['hits']['total']['value'])
+                        return str(idade_media)
+                
+                else:
+                        filtro = filtro.split("|")
+                        campo = str(filtro[0])
+                        busca = str(filtro[1])
+                        idade_total = 0
+                        res = es.search(index="pessoas", body={"_source": [ "data_de_nascimento" ],"size": 100,"query" : { "bool" : { "must" : [ {"match" : {"falecimento.data": "2999-01-01"}}, {"match" : { campo : busca }}]}}})
+                        for i in res['hits']['hits']:
+                                x = str(i)
+                                nascimento = str(x[110:120])
+                                temp = nascimento.split("-")
+                                nascimento = datetime(int(temp[0]), int(temp[1]), int(temp[2]))
+                                today = date.today()
+                                idade = today.year - nascimento.year - ((today.month, today.day) < (nascimento.month, nascimento.day))
+                                idade_total = int(idade_total) + int(idade)
+                                #return "Ok"
+
+                        idade_media = idade_total / int(res['hits']['total']['value'])
+                        return str(idade_media)
                 
         except:
                 return "Error"
@@ -515,3 +532,29 @@ if __name__ == '__main__':
 #              
 #        except:
 #                return "Error" 
+
+
+
+
+#@app.route('/idade_media', methods=['GET'])
+#def idade_media():
+#import json, subprocess
+                #from datetime import date, datetime
+                #resultado = subprocess.check_output('curl -XGET "localhost:9200/pessoas/_search?pretty" -H "Content-Type: application/json" --data @_source.json')
+                #temp = resultado.decode('utf-8')
+                #obj = json.loads(temp)
+                #idade_total = 0
+                #for element in obj['hits']['hits']:
+                #        temp = str(element)
+                #        temp = temp.split(",")
+                #        #return "Ok"
+                #        temp = temp[4]
+                #        nascimento = str(temp[36:46])
+                #        temp = nascimento.split("-")
+                #        nascimento = datetime(int(temp[0]), int(temp[1]), int(temp[2]))
+                #        today = date.today()
+                #        idade = today.year - nascimento.year - ((today.month, today.day) < (nascimento.month, nascimento.day))
+                #        idade_total = int(idade_total) + int(idade)
+                #
+                #idade_media = idade_total / int(obj['hits']['total']['value'])
+                #return "A idade média da população é:" + str(idade_media)
