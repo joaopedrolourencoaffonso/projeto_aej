@@ -458,6 +458,19 @@ def familia(num):
                 
         except:
                 return "Error"
+  
+@app.route('/upload')
+def upload_file():
+        return render_template('upload.php')
+	
+@app.route('/uploader', methods = ['GET', 'POST'])
+def uploader_file():
+        from werkzeug.utils import secure_filename
+        if request.method == 'POST':
+                f = request.files['file']
+                f.save(secure_filename(f.filename))
+                return 'file uploaded successfully'
+
         
 #@app.route('/search/<string:word>', methods=['GET'])
 #def search(word):
