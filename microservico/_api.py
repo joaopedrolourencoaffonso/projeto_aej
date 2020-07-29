@@ -104,6 +104,16 @@ def search_fields(search):
                         res = es.search(index="pessoas", body=query)
                         return str(res["hits"]["total"]["value"])
                 
+                if lista[0] == "3":  #query de data ex: 3|sobrenome|alonso|genero|f
+                        query = { "query": { "bool": { "must": [ ] } } }
+                        i = 3
+                        while i < len(lista):
+                                query["query"]["bool"]["must"].append({ 'match': { str(lista[i]): str(lista[i+1]) } })
+                                i = i + 2
+                                
+                        res = es.search(index="pessoas", body=query)
+                        return str(res["hits"]["total"]["value"])
+                
                 else:
                         return "Error"
                 
