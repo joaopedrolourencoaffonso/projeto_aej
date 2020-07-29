@@ -89,17 +89,38 @@ def search_fields(search):
                 from elasticsearch import Elasticsearch
                 es = Elasticsearch()
                 lista = search.split("|")
-                if lista[0] == 1 :  #query de data. ex: (1|1998-01-16|2000-01-01
-                        query = { "query": { "bool": { "must": [ { "range" : { "data_de_nascimento" : { "gte" : str(lista[1]), "lt" : str(lista[2]) } } }, { "match": { str(lista[3]) : str(lista[4) } } ] } } }
-
-                #exemplo# query = { "query": { "bool": { "must": [ { "range" : { "data_de_nascimento" : { "gte" : str(lista[1]), "lt" : str(lista[2] ) } } }, { "match": { "nome" : "José" } } ] } } }
+                if lista[0] == "1" :  #query de data. ex: 1|1998-01-16|2000-01-01
+                        query = { "query": { "range" : { "data_de_nascimento" : { "gte" : str(lista[1]), "lt" : str(lista[2]) } } } }
+                        res = es.search(index="pessoas", body=query)
+                        return str(res["hits"]["total"]["value"])
                         
+                if lista[0] == "2":  #query de data ex: 1|1998-01-16|2000-01-01|sobrenome|alonso|genero|f
+                        query = { "query": { "bool": { "must": [ { "range" : { "data_de_nascimento" : { "gte" : str(lista[1]), "lt" : str(lista[2]) } } } ] } } }
+                        i = 3
+                        while i < len(lista):
+                                query["query"]["bool"]["must"].append({ 'match': { str(lista[i]): str(lista[i+1]) } })
+                                i = i + 2
+                                
+                        res = es.search(index="pessoas", body=query)
+                        return str(res["hits"]["total"]["value"])
+                
+                else:
+                        return "Error"
                 
 
         except:
                 return "Error"
 
 
+@app.route('/search_date_range/<string:dates>', methods=['GET'])
+def search_date_range(dates):
+        try:
+                search = "1|" + str(dates)
+                results = search_fields(search)
+                return str(results)
+
+        except:
+                return "Error"
 
 
 
