@@ -126,6 +126,25 @@ def search_fields(search):
                         res = es.search(index="pessoas", body=query)
                         temp = str(res['hits']['hits'][0]).split("'")
                         return (temp[19],temp[25])
+                
+                if lista[0] == "5": #query super genérica (devolve o json resultante de uma pesquisa)
+                        import json
+                        query = {"_source": [ ],"size": 100,"query" : { "bool" : { "must" : [ ]}}}
+                        i = 2
+                        while i < len(lista): #5|2|nome|falecimento.data|sobrenome|Almeida|genero|m
+                                if i <= int(lista[1]) + 1:
+                                        query["_source"].append( lista[i] )
+                                        i = i + 1
+                                        
+                                elif i < len(lista):
+                                        query["query"]["bool"]["must"].append({ 'match': { str(lista[i]): str(lista[i+1]) } })
+                                        i = i + 2
+                                        
+                                else:
+                                        break
+                                        
+                        res = es.search(index="pessoas", body=query)
+                        return res
                         
                 else:
                         return "Error"              
