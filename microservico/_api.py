@@ -89,14 +89,14 @@ def search_fields(search):
                 from elasticsearch import Elasticsearch
                 es = Elasticsearch()
                 lista = search.split("|")
-                if lista[0] == "1" :  #query de data. ex: 1|1998-01-16|2000-01-01
+                if lista[0] == "1" :  #filtra todos os nascimentos entre duas datas. ex: 1|1998-01-16|2000-01-01
                         query = { "query": { "range" : { "data_de_nascimento" : { "gte" : str(lista[1]), "lt" : str(lista[2]) } } } }
                         res = es.search(index="pessoas", body=query)
                         return str(res["hits"]["total"]["value"])
                         
-                if lista[0] == "2":  #query de data ex: 1|1998-01-16|2000-01-01|sobrenome|alonso|genero|f
+                if lista[0] == "2":  #filtra todos os nascimentos entre duas datas mais alguns fatores a sua escolha ex: 1|1998-01-16|2000-01-01|sobrenome|alonso|genero|f
                         query = { "query": { "bool": { "must": [ { "range" : { "data_de_nascimento" : { "gte" : str(lista[1]), "lt" : str(lista[2]) } } } ] } } }
-                        i = 3
+                        i = 1
                         while i < len(lista):
                                 query["query"]["bool"]["must"].append({ 'match': { str(lista[i]): str(lista[i+1]) } })
                                 i = i + 2
@@ -104,19 +104,31 @@ def search_fields(search):
                         res = es.search(index="pessoas", body=query)
                         return str(res["hits"]["total"]["value"])
                 
-                if lista[0] == "3":  #query de data ex: 3|sobrenome|alonso|genero|f
+                if lista[0] == "3":  #filtra baseado em fatores a sua escolha ex: 3|sobrenome|alonso|genero|f
                         query = { "query": { "bool": { "must": [ ] } } }
-                        i = 3
+                        i = 1
                         while i < len(lista):
-                                query["query"]["bool"]["must"].append({ 'match': { str(lista[i]): str(lista[i+1]) } })
+                                query["query"]["bool"]["must"].append({ 'match': { str(lista[i]): str(lista[i+1]) } }) #query 'ou' ao invés de 'e'
                                 i = i + 2
-                                
+
+                        if lista[1] == "id": # concluo que ninguém vai tentar filtrar usando o "id", já que eles são únicos, vão devolver apenas um resultado
+                                res = es.search(index="pessoas", body=query)
+                                temp = str(res['hits']['hits'][0])
+                                temp = temp.split("'")
+                                return str(temp[25])
+
+                        else:
+                                res = es.search(index="pessoas", body=query)
+                                return str(res["hits"]["total"]["value"])
+
+                if lista[0] == "4": #query de nome mais comum no momento
+                        query = {"_source": [ "nome", "falecimento.data" ],"size": 100,"query" : { "bool" : { "must" : [ {"match" : {"id": str(lista[1])}}]}}}
                         res = es.search(index="pessoas", body=query)
-                        return str(res["hits"]["total"]["value"])
-                
+                        temp = str(res['hits']['hits'][0]).split("'")
+                        return (temp[19],temp[25])
+                        
                 else:
-                        return "Error"
-                
+                        return "Error"              
 
         except:
                 return "Error"
