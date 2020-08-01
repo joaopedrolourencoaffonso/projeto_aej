@@ -115,7 +115,7 @@ def search_fields(search):
                                 res = es.search(index="pessoas", body=query)
                                 temp = str(res['hits']['hits'][0])
                                 temp = temp.split("'")
-                                return str(temp[25])
+                                return str(temp[23])
 
                         else:
                                 res = es.search(index="pessoas", body=query)
