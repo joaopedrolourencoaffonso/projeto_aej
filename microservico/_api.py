@@ -163,7 +163,27 @@ def search_date_range(dates):
         except:
                 return "Error"
 
+@app.route('/idade_media/<string:filtro>', methods=['GET'])
+def idade_media(filtro):
+        try:
+                #exemplo de query: genero|f|falecimento.data|2999-01-01
+                filtro = "5|1|data_de_nascimento|" + str(filtro)
+                res = search_fields(filtro)
+                i = 0
+                total = 0
+                if int(res["hits"]["total"]["value"]) == 0:
+                        return "0"      #se nada for encontrado, a API simplesmente retorna 0
+                else:
+                        while i < int(res["hits"]["total"]["value"]):
+                                temp = str(res['hits']['hits'][1]['_source']['data_de_nascimento'])
+                                total = total + int(calcula_idade(temp))
+                                i = i + 1
 
+                        media = total / int(res["hits"]["total"]["value"])
+                        return str(media)
+                #return res['hits']['hits'][8]['_source']['data_de_nascimento']
+        except:
+                return "Error"
 
 if __name__ == '__main__':
         app.run(debug=True)
