@@ -185,6 +185,65 @@ def idade_media(filtro):
         except:
                 return "Error"
 
+        
+@app.route('/familia/<string:_id>', methods=['GET'])
+def familia(_id):
+        try:
+                if str(_id) == "0000":
+                        return "Usuário desconhecido ou inexistente"
+                else:
+                        #############################################################################pessoa
+                        query = "5|4|nome|sobrenome|familia.pai|familia.mae|id|"
+                        temp =  query + str(_id)
+                        pessoa = search_fields(temp)
+                        nome = pessoa['hits']['hits'][0]['_source']['nome']
+                        sobrenome = pessoa['hits']['hits'][0]['_source']['sobrenome']
+                        id_pai = pessoa['hits']['hits'][0]['_source']['familia']['pai']
+                        id_mae = pessoa['hits']['hits'][0]['_source']['familia']['mae']
+                        #############################################################################pai
+                        temp = query + str(id_pai)
+                        pessoa = search_fields(temp)
+                        nome_pai = pessoa['hits']['hits'][0]['_source']['nome']
+                        sobrenome_pai = pessoa['hits']['hits'][0]['_source']['sobrenome']
+                        id_avo_paterno = pessoa['hits']['hits'][0]['_source']['familia']['pai']
+                        id_avo_paterna = pessoa['hits']['hits'][0]['_source']['familia']['mae']
+                        #############################################################################mae
+                        temp = query + str(id_mae)
+                        pessoa = search_fields(temp)
+                        nome_mae = pessoa['hits']['hits'][0]['_source']['nome']
+                        sobrenome_mae = pessoa['hits']['hits'][0]['_source']['sobrenome']
+                        id_avo_materno = pessoa['hits']['hits'][0]['_source']['familia']['pai']
+                        id_avo_materna = pessoa['hits']['hits'][0]['_source']['familia']['mae']
+                        #############################################################################avo_paterno
+                        temp = query + str(id_avo_paterno)
+                        pessoa = search_fields(temp)
+                        nome_avo_paterno = pessoa['hits']['hits'][0]['_source']['nome']
+                        sobrenome_avo_paterno = pessoa['hits']['hits'][0]['_source']['sobrenome']
+                        #############################################################################avo_paterna
+                        temp = query + str(id_avo_paterna)
+                        pessoa = search_fields(temp)
+                        nome_avo_paterna = pessoa['hits']['hits'][0]['_source']['nome']
+                        sobrenome_avo_paterna = pessoa['hits']['hits'][0]['_source']['sobrenome']
+                        #############################################################################avo_materno
+                        temp = query + str(id_avo_materno)
+                        pessoa = search_fields(temp)
+                        nome_avo_materno = pessoa['hits']['hits'][0]['_source']['nome']
+                        sobrenome_avo_materno = pessoa['hits']['hits'][0]['_source']['sobrenome']
+                        ############################################################################avo_materna
+                        temp = query + str(id_avo_materna)
+                        pessoa = search_fields(temp)
+                        nome_avo_materna = pessoa['hits']['hits'][0]['_source']['nome']
+                        sobrenome_avo_materna = pessoa['hits']['hits'][0]['_source']['sobrenome']
+                        ############################################################################retorno
+                        retorno = str(nome) + " " + str(sobrenome) + "|" + str(nome_pai) + " " + str(sobrenome_pai) + "|" + str(nome_mae) + " " + str(sobrenome_mae)
+                        retorno = retorno + "|" + str(nome_avo_paterno) + " " + str(sobrenome_avo_paterno) + "|" + str(nome_avo_paterna) + " " + str(sobrenome_avo_paterna)
+                        retorno = retorno + "|" + str(nome_avo_materno) + " " + str(sobrenome_avo_materno) + "|" + str(nome_avo_materna) + " " + str(sobrenome_avo_materna)
+                        return str(retorno)
+                        
+                
+        except:
+                return "Error"        
+        
 if __name__ == '__main__':
         app.run(debug=True)
 
