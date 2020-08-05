@@ -127,7 +127,7 @@ def search_fields(search):
                         temp = str(res['hits']['hits'][0]).split("'")
                         return (temp[19],temp[25])
                 
-                if lista[0] == "5": #query super genérica (devolve o json resultante de uma pesquisa)
+                if lista[0] == "5": #query maleável do tipo "and" (devolve o json resultante de uma pesquisa)
                         import json
                         query = {"_source": [ ],"size": 100,"query" : { "bool" : { "must" : [ ]}}}
                         i = 2
@@ -145,7 +145,25 @@ def search_fields(search):
                                         
                         res = es.search(index="pessoas", body=query)
                         return res
-                        
+                if lista[0] == "6": #query maleável do tipo "ou" (devolve o json resultante de uma pesquisa)
+                        import json
+                        query = {"_source": [ ],"size": 100,"query" : { "bool" : { "should" : [ ]}}}
+                        i = 2
+                        while i < len(lista): #6|2|nome|falecimento.data|sobrenome|Almeida|genero|m
+                                if i <= int(lista[1]) + 1:
+                                        query["_source"].append( lista[i] )
+                                        i = i + 1
+                                        
+                                elif i < len(lista):
+                                        query["query"]["bool"]["should"].append({ 'match': { str(lista[i]): str(lista[i+1]) } })
+                                        i = i + 2
+                                        
+                                else:
+                                        break
+                                        
+                        res = es.search(index="pessoas", body=query)
+                        return res
+                
                 else:
                         return "Error"              
 
@@ -246,4 +264,3 @@ def familia(_id):
         
 if __name__ == '__main__':
         app.run(debug=True)
-
