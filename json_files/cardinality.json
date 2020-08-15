@@ -1,0 +1,11 @@
+{
+"aggs" : {
+    "restaurant_count" : {
+        "cardinality" : {
+            "field" : "nome",
+            "precision_threshold": 100, 
+            "rehash": false 
+           }
+         }
+     }
+}

@@ -1,0 +1,12 @@
+{
+  "query": {
+    "bool": {
+      "should": [
+        {"match": {"nome":"Paula"}},
+        {"match": {"sobrenome":"Da Silva"}}
+        ],
+      "minimum_should_match" : 1,
+      "boost" : 1.0
+      }
+    }
+  }

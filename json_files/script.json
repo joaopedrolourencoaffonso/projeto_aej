@@ -1,0 +1,9 @@
+{
+    "script" : {
+        "source": "ctx._source.nome += params.novo_nome",
+        "lang": "painless",
+        "params" : {
+            "novo_nome" : "Jose"
+        }
+    }
+}

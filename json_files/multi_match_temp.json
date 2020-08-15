@@ -1,0 +1,10 @@
+{
+  "query": { 
+    "bool": { 
+      "must": [
+        { "match": { "$field1": "$alvo1"}},
+        { "match": { "$field2": "$alvo2" }}
+      ]
+     }
+  }
+}

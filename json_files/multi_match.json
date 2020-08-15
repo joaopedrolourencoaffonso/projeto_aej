@@ -1,0 +1,10 @@
+{
+  "query": { 
+    "bool": { 
+      "must": [
+        { "match": { "nome": "Paula"}},
+        { "match": { "sobrenome": "Da Silva"}}
+      ]
+     }
+  }
+}

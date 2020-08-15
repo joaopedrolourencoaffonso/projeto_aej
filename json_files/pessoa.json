@@ -1,0 +1,44 @@
+{
+        "id": "0048",
+        "nome": "Mariana",
+        "sobrenome" : "Alonso",
+        "cor": "negro", 
+        "genero": "f",       
+        "pessoa_juridica": true,*
+        "data_de_nascimento": "2002-08-01",
+	"endereco" : {*
+            "cidade": "Florianópolis",
+            "estado": "SC",
+            "pais": "Brasil",
+            "lat": 123.01,*
+            "long": 200.22*
+        },*
+        "escolaridade": [
+            "ensino basico completo"
+        ],                
+        "familia": {*
+            "pai": "0029",
+            "mae": "0037",
+            "filhos": [
+		"false"
+            ],
+            "conjuge": "false"
+        },    *    
+        "falecimento": {
+            "data": "1800-12-12",            
+            "causas": ["false"]
+        },
+        "saude": {  *          
+            "doencas": ["false"],
+            "necessidades_especiais": {                
+                "tipo": "false"
+            },
+            "sangue": "AB|1",
+            "comorbidade": [
+		"fumante"
+		]            
+        },*
+        "ocupacao": true,
+        "redes_sociais": [true]*
+    	
+}

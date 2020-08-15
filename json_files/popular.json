@@ -1,0 +1,6 @@
+curl -X GET "localhost:9200/twitter/_msearch?pretty" -H 'Content-Type: application/json' -d'
+{ }
+{"query" : {"match" : { "message": "this is a test"}}}
+{"index": "twitter2"}
+{"query" : {"match_all" : {}}}
+'

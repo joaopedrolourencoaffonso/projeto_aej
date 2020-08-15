@@ -1,0 +1,1 @@
+{ "query": { "range" : { "data_de_nascimento" : { "gte" : "$data_inicial", "lt" : "$data_final" } } } }

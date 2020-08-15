@@ -1,0 +1,45 @@
+{
+        "id": "$_id",
+        "nome": "$nome",
+        "sobrenome" : "$sobrenome",
+        "cor": "branco", 
+        "genero": "m",       
+        "pessoa_juridica": false,
+        "data_de_nascimento": "2012-12-01",
+	"endereco" : {
+            "cidade": "Florianópolis",
+            "estado": "SC",
+            "pais": "Brasil",
+            "lat": 123.01,
+            "long": 201.22
+        },
+        "escolaridade": [
+            "ensino médio completo"
+        ],                
+        "familia": {
+            "pai": "0034",
+            "mae": "0027",
+            "filhos": [
+		"false"
+            ],
+            "conjuge": "false"
+        },        
+        "falecimento": {
+            "data": "2999-01-01",            
+            "causas": ["false"]
+        },
+        "saude": {            
+            "doenças": ["false"],
+            "necessidades_especiais": {                
+                "tipo": "false"
+            },
+            "sangue": {
+                "tipo": "A",
+                "fator_rh": true
+            },
+            "fumante": false            
+        },
+        "ocupacao": true,
+        "redes_sociais": [true]
+    	
+}
