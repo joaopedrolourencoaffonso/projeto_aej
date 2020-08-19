@@ -1,5 +1,4 @@
 
-
 from flask import Flask, jsonify, request, render_template
 app = Flask(__name__)
 
@@ -10,62 +9,138 @@ def index():
 @app.route('/projeto_aej/<string:entrada>', methods=['GET'])
 def autenticacao(entrada):
         try:
+                #modelo de entrada seria: 0001&&apeacjpla&&insira_id_da_API_aqui&&insira_query_aqui
                 from elasticsearch import Elasticsearch
                 es = Elasticsearch()
-                lista = entrada.split("|")
+                lista = entrada.split("&&")
                 query = { "query": { "bool": { "must": [ {"match": { "id": lista[0]}}, {"match": { "password": lista[1]}} ] } } }
                 res = es.search(index="autentica", body=query)
                 if (res["hits"]["total"]["value"] == 1):
-                        return jsonify({"resultado":"1"})
+                        if (lista[2] == "1"):   #0001&&apeacjpla&&1&&{"nome":"José", "sobrenome":"Alonso",....}
+                                resultado = cadastro(lista[3])
+                                return resultado
+                        
+                        if (lista[2] == "2"):   #0001&&apeacjpla&&2&&0045
+                                resultado = delete(lista[3])
+                                return resultado
+
+                        if (lista[2] == "3"):
+                                resultado = pesquisa(lista[3])
+                                return resultado
+                        
+                        if (lista[2] == "4"):
+                                resultado = pesquisa_avancada(lista[3])
+                                return resultado
+                        else:
+                                return jsonify({"resultado":"Essa API não existe"})
                 else:
-                        return jsonify({"resultado":"0"})
+                        return jsonify({"resultado":"Erro de autentificação"})
 
         except:
-                return jsonify({"resultado":"-1"})
+                return jsonify({"resultado":"Erro de execução 3"})
         
 
-@app.route('/pesquisa_simples/<string:busca>', methods=['GET'])
-def pesquisa_simples(busca):
+@app.route('/cadastro/<string:pessoa>', methods=['GET'])
+def cadastro(pessoa):
         try:
-                import requests, json
-                #modelo de input: campo_pesquisado|busca
-                lista = busca.split("|")
-                temp = 'http://localhost:5000/projeto_aej/' + str(lista[0]) + "|" + str(lista[1])
-                res = requests.get(temp)
-                res.raise_for_status()
-                resultado = res.json()
-                #return str(obj['resultado'])
-                if (resultado['resultado'] == "0"):
-                        return jsonify({"resultado":"Error1"})
+                from elasticsearch import Elasticsearch
+                es = Elasticsearch()
+                import json
+                query_id = {"query" : { "match_all" : {} } }
+                res = es.search(index="pessoa", body=query_id)
+                num = int(res["hits"]["total"]["value"]) + 1
                 
-                if (resultado['resultado'] == "-1"):
-                        return jsonify({"resultado":"Error2"})
-                
-                if (resultado['resultado'] == "1"):
-                        filtro = "http://localhost:9200/pessoas/_count?q=$campo:$busca"
-                        filtro = filtro.replace("$campo",str(lista[2]))
-                        filtro = filtro.replace("$busca",str(lista[3]))
-                        res = requests.get(filtro)
-                        res.raise_for_status()
-                        obj = res.json()
-                        return jsonify({"resultado":str(obj["count"])})
-                
-        except:
-                return jsonify({"resultado":"Error3"})
+                if num < 10:
+                        _id = "000" + str(num)
+                        
+                elif (num < 100) and (num > 9):
+                        _id = "00" + str(num)
+                        
+                else:
+                        if (99 < num) and (num < 1000):
+                                _id = "0" + str(num)
+                                
+                        else:
+                                return "Erro, a base de dados está lotada."
 
+                pessoa = pessoa.replace("'", '\"')
+                pessoa = json.loads(pessoa)
+                pessoa['id'] = str(_id)
+                es.index(index='pessoa',id=str(_id),body=pessoa)
+                
+                return jsonify({"resultado":"Adicionado com sucesso!"})
+        except:
+                return jsonify({"resultado":"Erro de execução"})
+
+
+@app.route('/delete/<string:_id>', methods=['GET'])
+def delete(_id):
+        try:
+                from elasticsearch import Elasticsearch
+                es = Elasticsearch()
+                es.delete(index="pessoa", doc_type="_doc",id=str(_id))
+                return jsonify({"resultado":"A entrada com id: " + str(_id) + ", foi efetuada"})
         
+        except:
+                return jsonify({"resultado":"Erro de execução"})
+ 
+
+@app.route('/pesquisa/<string:busca>', methods=['GET'])
+def pesquisa(busca):
+        try:
+                from elasticsearch import Elasticsearch
+                es = Elasticsearch()
+                lista = busca.split("|")
+                query = { "query": { "bool": { "must": [ ] } } }
+                if lista[0] == "0":
+                        i = 1
+                        
+                else:
+                        query["query"]["bool"]["must"].append({ 'range' : { 'data_de_nascimento' : { 'gte' : str(lista[1]), 'lt' : str(lista[2])} } })
+                        i = 3
+                
+                while i < len(lista):
+                        query["query"]["bool"]["must"].append({ 'match': { str(lista[i]): str(lista[i+1]) } })
+                        i = i + 2
+
+                res = es.search(index="pessoas", body=query)
+                return jsonify({"resultado": str(res["hits"]["total"]["value"])})
+
+        except:
+                return jsonify({"resultado":"Erro de execução"})
+
+@app.route('/pesquisa_avancada/<string:busca>', methods=['GET'])
+def pesquisa_avancada(busca):
+        try:
+                from elasticsearch import Elasticsearch
+                es = Elasticsearch()
+                busca = busca.split("$")
+                lista = busca[0].split("|")
+                query = {"_source": [ ],"size": 10000,"query" : { "bool" : { "must" : [ ]}}}
+                i = 2
+
+                if len(busca) == 3:
+                        query["query"]["bool"]["must"].append({ 'range' : { 'data_de_nascimento' : { 'gte' : str(busca[1]), 'lt' : str(busca[2])} } })
+                
+                
+                while i < len(lista): #0|2|nome|falecimento.data|sobrenome|Almeida|genero|m
+                        if i <= int(lista[1]) + 1:
+                                query["_source"].append(lista[i])
+                                i = i + 1
+
+                        elif i < len(lista):
+                                query["query"]["bool"]["must"].append({ 'match': { str(lista[i]): str(lista[i+1]) } })
+                                i = i + 2
+                        else:
+                                break
+
+                res = es.search(index="pessoas", body=query)
+                return res
+
+        except:
+                return jsonify({"resultado":"Erro de execução"})
+
+
 
 if __name__ == '__main__':
         app.run(debug=True)
-
-
-
-
-
-
-
-
-
-
-
-
