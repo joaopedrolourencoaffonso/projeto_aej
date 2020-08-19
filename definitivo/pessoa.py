@@ -31,6 +31,10 @@ def autenticacao(entrada):
                         if (lista[2] == "4"):
                                 resultado = pesquisa_avancada(lista[3])
                                 return resultado
+
+                        if (lista[2] == "5"):
+                                resultado = nome(lista[3])
+                                return resultado
                         else:
                                 return jsonify({"resultado":"Essa API não existe"})
                 else:
