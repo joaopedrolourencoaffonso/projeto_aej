@@ -90,6 +90,8 @@ def pesquisa(busca):
         try:
                 from elasticsearch import Elasticsearch
                 es = Elasticsearch()
+                import json
+                
                 lista = busca.split("|")
                 query = { "query": { "bool": { "must": [ ] } } }
                 if lista[0] == "0":
@@ -104,7 +106,7 @@ def pesquisa(busca):
                         i = i + 2
 
                 res = es.search(index="pessoas", body=query)
-                return jsonify({"resultado": str(res["hits"]["total"]["value"])})
+                return json.loads('{"resultado":"' + str(res["hits"]["total"]["value"]) + '"}'
 
         except:
                 return jsonify({"resultado":"Erro de execução"})
@@ -140,7 +142,49 @@ def pesquisa_avancada(busca):
         except:
                 return jsonify({"resultado":"Erro de execução"})
 
+#############################
 
+####APIs que interagem com as APIs acima
+        
+@app.route('/nome/<int:num>', methods=['GET'])
+def nome(num):
+        try:
+                #import requests, json
+                #se num = 1, ele devolve o nome mais comum da história, se num = 2, ele devolve o nome mais comum no momento
+                res = pesquisa("1|1900-01-01|3000-01-01")
+                tamanho = range(1, int(res["resultado"])) 
+                lista = {"anonimo":1}
+                j = 0
+                
+                if num == 1:
+                        for i in tamanho:
+                                if i < 10:
+                                        _id = "000" + str(i)
+                                elif (i < 100) and (i > 9):
+                                        _id = "00" + str(i)
+                                else:
+                                        if (99 < i) and (i < 1000):
+                                                _id = "0" + str(i)
+                                        else:
+                                                return "Erro"
+
+                                string = "0|1|nome|id|" + str(_id) #0|1|data_de_nascimento|id|
+                                res = pesquisa_avancada(string)
+                                nome = str(res['hits']['hits'][0]['_source']['nome'])
+                                y = list(lista.keys())
+                                if nome in y:
+                                        lista[nome] = lista[nome] + 1
+                                else:
+                                        lista[nome] = 1
+
+                        popular = max(lista, key=lista.get)
+                        return jsonify({"resultado":popular})
+
+                else:
+                        return jsonify({"resultado":"Error de escolha de opção, as únicas válidas são 1 ou 0"})
+                
+        except:
+                return jsonify({"resultado":"Error de execucao"})
 
 if __name__ == '__main__':
         app.run(debug=True)
