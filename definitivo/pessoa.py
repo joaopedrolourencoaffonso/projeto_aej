@@ -217,6 +217,104 @@ def nome(num):
                 
         except:
                 return jsonify({"resultado":"Error de execucao"})
+                                  
+                                  
+@app.route('/familia/<string:_id>', methods=['GET'])
+def familia(_id):
+        try:
+                if str(_id) == "0000":
+                        return jsonify({"resultado":"Usuário desconhecido ou inexistente"})
+                else:
+                        #############################################################################pessoa
+                        query = "0|4|nome|sobrenome|familia.pai|familia.mae|id|"
+                        temp =  query + str(_id)
+                        pessoa = pesquisa_avancada(temp)
+                        nome = pessoa['hits']['hits'][0]['_source']['nome']
+                        sobrenome = pessoa['hits']['hits'][0]['_source']['sobrenome']
+                        id_pai = pessoa['hits']['hits'][0]['_source']['familia']['pai']
+                        id_mae = pessoa['hits']['hits'][0]['_source']['familia']['mae']
+                        #############################################################################pai
+                        temp = query + str(id_pai)
+                        pessoa = pesquisa_avancada(temp)
+                        nome_pai = pessoa['hits']['hits'][0]['_source']['nome']
+                        sobrenome_pai = pessoa['hits']['hits'][0]['_source']['sobrenome']
+                        id_avo_paterno = pessoa['hits']['hits'][0]['_source']['familia']['pai']
+                        id_avo_paterna = pessoa['hits']['hits'][0]['_source']['familia']['mae']
+                        #############################################################################mae
+                        temp = query + str(id_mae)
+                        pessoa = pesquisa_avancada(temp)
+                        nome_mae = pessoa['hits']['hits'][0]['_source']['nome']
+                        sobrenome_mae = pessoa['hits']['hits'][0]['_source']['sobrenome']
+                        id_avo_materno = pessoa['hits']['hits'][0]['_source']['familia']['pai']
+                        id_avo_materna = pessoa['hits']['hits'][0]['_source']['familia']['mae']
+                        #############################################################################avo_paterno
+                        temp = query + str(id_avo_paterno)
+                        pessoa = pesquisa_avancada(temp)
+                        nome_avo_paterno = pessoa['hits']['hits'][0]['_source']['nome']
+                        sobrenome_avo_paterno = pessoa['hits']['hits'][0]['_source']['sobrenome']
+                        #############################################################################avo_paterna
+                        temp = query + str(id_avo_paterna)
+                        pessoa = pesquisa_avancada(temp)
+                        nome_avo_paterna = pessoa['hits']['hits'][0]['_source']['nome']
+                        sobrenome_avo_paterna = pessoa['hits']['hits'][0]['_source']['sobrenome']
+                        #############################################################################avo_materno
+                        temp = query + str(id_avo_materno)
+                        pessoa = pesquisa_avancada(temp)
+                        nome_avo_materno = pessoa['hits']['hits'][0]['_source']['nome']
+                        sobrenome_avo_materno = pessoa['hits']['hits'][0]['_source']['sobrenome']
+                        ############################################################################avo_materna
+                        temp = query + str(id_avo_materna)
+                        pessoa = pesquisa_avancada(temp)
+                        nome_avo_materna = pessoa['hits']['hits'][0]['_source']['nome']
+                        sobrenome_avo_materna = pessoa['hits']['hits'][0]['_source']['sobrenome']
+                        ############################################################################retorno
+                        retorno = str(nome) + " " + str(sobrenome) + "|" + str(nome_pai) + " " + str(sobrenome_pai) + "|" + str(nome_mae) + " " + str(sobrenome_mae)
+                        retorno = retorno + "|" + str(nome_avo_paterno) + " " + str(sobrenome_avo_paterno) + "|" + str(nome_avo_paterna) + " " + str(sobrenome_avo_paterna)
+                        retorno = retorno + "|" + str(nome_avo_materno) + " " + str(sobrenome_avo_materno) + "|" + str(nome_avo_materna) + " " + str(sobrenome_avo_materna)
+                        return str(retorno)
+                
+        except:
+                return jsonify({"resultado":"Error de execucao"})
+
+
+
+@app.route('/calcula_idade/<string:data>', methods=['GET'])
+def calcula_idade(data):
+        try:
+                from datetime import date, datetime
+                nascimento = str(data)
+                temp = nascimento.split("-")
+                nascimento = datetime(int(temp[0]), int(temp[1]), int(temp[2]))
+                today = date.today()
+                idade = today.year - nascimento.year - ((today.month, today.day) < (nascimento.month, nascimento.day))
+                return str(idade)
+                
+        except:
+                return jsonify({"resultado":"Error de execucao"})
+
+
+@app.route('/idade_media/<string:filtro>', methods=['GET'])
+def idade_media(filtro):
+        try:
+                #exemplo de query: genero|f|falecimento.data|2999-01-01
+                filtro = "0|1|data_de_nascimento|falecimento.data|2999-01-01|" + str(filtro)
+                res = pesquisa_avancada(filtro)
+                i = 0
+                total = 0
+                #return res
+                if int(res["hits"]["total"]["value"]) == 0:
+                        return jsonify({"resultado":"A query não retornou resultados"})      #se nada for encontrado, a API simplesmente retorna 0
+                else:
+                        while i < int(res["hits"]["total"]["value"]):
+                                temp = str(res['hits']['hits'][i]['_source']['data_de_nascimento'])
+                                total = total + int(calcula_idade(temp))
+                                i = i + 1
+
+                media = total / int(res["hits"]["total"]["value"])
+                return jsonify({"resultado":str(media)})
+                                
+        except:
+                return jsonify({"resultado":"Error de execucao"})
 
 if __name__ == '__main__':
         app.run(debug=True)
