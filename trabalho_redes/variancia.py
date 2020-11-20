@@ -36,17 +36,9 @@ desvio_padrao = round(desvio_padrao, 2);
 
 print( arquivo + ": " + str(variancia) + " | " + str(desvio_padrao));
 
-plt.title('Idades de um grupo', fontsize=20)
-plt.xlabel('Idade', fontsize=15)
-plt.ylabel('Intervalos \n', fontsize=15)
+plt.title('Distribuição do ' + arquivo, fontsize=20)
+plt.xlabel('Intervalos', fontsize=15)
+plt.ylabel('Número de Pacotes por intervalo', fontsize=15)
 plt.tick_params(labelsize=15)
-plt.hist(lista, 5, rwidth=0.9);
+plt.hist(lista, bins=[0, 29.6, 59.2, 88.8, 118.4, 148.0, 177.6, 207.2, 236.8, 266.4], rwidth=0.9);
 plt.show();
-        
-
-                        
-
-
-
-
-
