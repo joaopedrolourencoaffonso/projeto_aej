@@ -1,9 +1,11 @@
 import math
 import matplotlib.pyplot as plt
 import sys
+from distfit import distfit
+import numpy
 
 arquivo = str(sys.argv[1]);
-media = 14;
+media = int(sys.argv[2]);
 lista = [];
 
 print("           nome             | variancia | desvio_padrao");
@@ -35,6 +37,17 @@ desvio_padrao = math.sqrt(variancia);
 desvio_padrao = round(desvio_padrao, 2);
 
 print( arquivo + ": " + str(variancia) + " | " + str(desvio_padrao));
+
+############
+
+dist = distfit()
+x = numpy.array(lista, dtype=numpy.float32)
+dist.fit_transform(x);
+print(dist.summary);
+print(dist.model);
+
+
+#############
 
 plt.title('Distribuição do ' + arquivo, fontsize=20)
 plt.xlabel('Intervalos', fontsize=15)
